@@ -6,12 +6,12 @@ Before usage, a new Discord application has to be created, as shown in the [inst
 
 ## Usage
 The bot has 3 commands:
-* !pomoc
-    usage: `!pomoc`
+* !pomoc  
+    usage: `!pomoc`  
     the bot sends the help message
-* !hrana
-    usage: `!hrana`
+* !hrana  
+    usage: `!hrana`  
     the bot sends the menu of the chosen restaurant. Which restaurant has been chosen in this instance can be seen in the help message or in the bot.py file where the value is assigned to a variable called "default"
-* !ponudba
-    usage: `!ponudba <query>`
+* !ponudba  
+    usage: `!ponudba <query>`  
     the bot sends the menu of the restaurant that has the entered query in it's name. If there are more restaurants like that, bot sends a numbered list with all those restaurants and waits for the user to reply with a number that is in front of the restaurant he was looking for. If there are multiple restaurants with queryed text in their names, anwser has to be chosen from the list in one minute!
