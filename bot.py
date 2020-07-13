@@ -1,5 +1,4 @@
 ### DISCORD DEL
-import discord
 from datetime import datetime
 from discord.ext import commands
 
@@ -11,7 +10,7 @@ client = commands.Bot(command_prefix="!")
 # here for easier overview over the bot, as the initialization takes some time at the beginning
 @client.event
 async def on_ready():
-    print("Bot is ready")
+    print("[general] Bot is ready")
 
 @client.command(name="pomoc")
 async def pomoc(ctx):
@@ -38,7 +37,7 @@ async def hrana(ctx):
     current_time = now.strftime("%D %H:%M:%S")
     # izpis v konzolo za boljši nadzor
     # output to the console for better control
-    print("Request for "+restaurant+" menu complete: ", current_time)
+    print("[general] Request for "+restaurant+" menu complete: ", current_time)
 
 # ob prejetju ukaza ponudba ("!ponudba <poizvedba>") izpiše ponudbo iskane restavracije, če se s poivedbo ujema
 #   več ponudnikov, uporabnik izbere iskanega
@@ -57,31 +56,32 @@ async def ponudba(ctx, *, query):
         await ctx.send("**"+options[0]+"**")
         await ctx.send(get_menu_message(providers[options[0]]))
         found = True
-        print("Request for", options[0], "menu complete: ", current_time)
+        print("[general] Request for", options[0], "menu complete: ", current_time)
     elif len(options) > 1:
-        list="```"
+        list = "```"
         for index, option in enumerate(options):
-            list+=('{:>4}'.format(str(index+1))+"  "+option+"\n")
-        list+="```"
-        if len(list)<=2000:
+            list += ('{:<4}'.format(str(index+1))+"  "+option+"\n")
+        list += "```"
+        if len(list) <= 2000:
             await ctx.send("**Več ponudnikov vsebuje iskan niz.**\nOdgovorite z številko, ki je na seznamu pred ponudnikom, katerega ponudbo želite.")
             await ctx.send(list)
         else:
             await ctx.send("**Iskani niz je preveč splošen, poskusite ponovno.**")
-            print("Search to broad for query", query, "", current_time)
+            print("[general] Search to broad for query", query+": "+current_time)
             return
 
         def check(m):
-            return int(m.content) >= 1 and int(m.content) <= len(options) and ctx.channel.id == m.channel.id
+            return 1 <= int(m.content) <= len(options) and ctx.channel.id == m.channel.id
 
         msg = await client.wait_for('message', check=check, timeout=60)
         await ctx.send("**"+options[int("{.content}".format(msg))-1]+"**")
         await ctx.send(get_menu_message(providers[options[int("{.content}".format(msg))-1]]))
         found = True
-        print("Request for", options[int("{.content}".format(msg))-1], "menu complete: ", current_time)
+        print("[general] Request for", options[int("{.content}".format(msg))-1], "menu complete: ", current_time)
     if not found:
         await ctx.send("**Med ponudniki ni zadetka, poskusite ponovno.**")
-        print("Provider", query, "not found!", current_time)
+        print("[general] Provider", query, "not found: "+current_time)
+
 
 ### WEB REQUESTS DEL
 import requests
@@ -89,7 +89,7 @@ from bs4 import BeautifulSoup
 
 # tu se lahko izbere katerakoli restavracija
 # here any of the providers can be chosen
-default=2529
+default = 2529
 url = "https://www.studentska-prehrana.si/restaurant/Details/"+str(default)
 
 headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"}
@@ -99,7 +99,8 @@ soup = BeautifulSoup(page.content, "html.parser")
 cards = [str(card) for card in soup.find_all(class_="text-bold color-blue")]
 restaurant = [str(niz) for niz in soup.find_all(class_="no-margin bold")][0].replace('<h3 class="no-margin bold">', "").replace('</h3>', "").strip()
 
-default_name=restaurant
+default_name = restaurant
+
 
 # DOBIVANJE IMENIKA PONUDNIKOV
 def get_providers():
@@ -115,8 +116,30 @@ def get_providers():
 
     return restaurants
 
+
 # DOBIVANJE JEDI
 def get_menu_message(ID):
+    now = datetime.now()
+    current_time = now.strftime("%D %H:%M:%S")
+    if ID not in recent_providers:
+        store_menu_message(ID, now)
+        print("[storage] Added "+str(ID)+" to recent providers: "+current_time)
+    else:
+        if now.strftime("%D") != recent_providers[ID].strftime("%D"):
+            store_menu_message(ID, now)
+            print("[storage] Refreshed the menu for "+str(ID)+": "+current_time)
+        else:
+            print("[storage] Today's menu already stored for "+str(ID)+": "+current_time)
+
+    return menu_messages[ID]
+
+
+def store_menu_message(ID, now):
+    menu_messages[ID] = scrape_menu(ID)
+    recent_providers[ID] = now
+
+
+def scrape_menu(ID):
     url = "https://www.studentska-prehrana.si/restaurant/Details/" + str(ID)
     page = requests.get(url, headers=headers)
     soup = BeautifulSoup(page.content, "html.parser")
@@ -133,8 +156,19 @@ def get_menu_message(ID):
     else:
         return food_message[:1966] + "\nPrikazan je samo delni meni```"
 
+
+# ERROR HANDLING
+# vem da to ni prav, ampak trenutno to ni prioriteta
+# I know that this is not the right way, but it is not a priority at the moment
+@client.event
+async def on_command_error(ctx, error):
+    print("[ error ] "+str(error))
+
+
 ### ZAGON BOTA
 providers = get_providers()
+recent_providers = dict()
+menu_messages = dict()
 # branje ključa za bot iz zasebne datoteke, ker se takšne stvari ne objavljajo na internetu
 # reading the bot key from a private file because things like that shouldn't be posted on the internet
 dat = open("key.txt", "r")
