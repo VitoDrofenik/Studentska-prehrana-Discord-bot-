@@ -229,7 +229,7 @@ def get_info_message(ID):
         sobota = "Zaprto"
     else:
         sobota = casi.split("<br/>")[4].strip()
-    nedelja = casi.split("Nedelja / Prazniki :")[1].replace("</div>]", "").strip()
+    nedelja = casi.split("Nedelja / Prazniki :")[1].replace("</div>]", "").replace("<br/> ", "").strip()
     info_message += "\nOdpiralni časi:\n\tMed tednom: "+med_tednom+"\n\tSobota: "+sobota+"\n\tNedelja in prazniki: "+nedelja
     return info_message
 
