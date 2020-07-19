@@ -224,8 +224,12 @@ def get_info_message(ID):
     info_message += "\nDoplačilo: " + doplacilo
     casi = str(soup.find_all(class_="col-md-12 text-bold"))
     med_tednom = casi.split("<br/>")[1].strip()
-    sobota = casi.split("<br/>")[4].strip()
-    nedelja = casi.split("<br/>")[7].replace("</div>]", "").strip()
+    sobota = casi.split("Sobota :")[1].strip()
+    if sobota.startswith("Zaprto"):
+        sobota = "Zaprto"
+    else:
+        sobota = casi.split("<br/>")[4].strip()
+    nedelja = casi.split("Nedelja / Prazniki :")[1].replace("</div>]", "").strip()
     info_message += "\nOdpiralni časi:\n\tMed tednom: "+med_tednom+"\n\tSobota: "+sobota+"\n\tNedelja in prazniki: "+nedelja
     return info_message
 
