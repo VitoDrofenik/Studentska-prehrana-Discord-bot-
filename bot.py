@@ -1,6 +1,5 @@
 ### DISCORD DEL
 from datetime import datetime
-from datetime import timedelta
 from discord.ext import commands
 
 # tukaj se lahko spremeni predpona, za katero bot posluša
@@ -68,15 +67,14 @@ async def ponudba(ctx, *, query):
             list += ('{:<4}'.format(str(index+1))+"  "+option+"\n")
         list += "```"
         if len(list) <= 2000:
-            await ctx.send("**Več ponudnikov vsebuje iskan niz.**\nOdgovorite z številko, ki je na seznamu pred ponudnikom, katerega ponudbo želite.")
-            await ctx.send(list)
+            await ctx.send("**Več ponudnikov vsebuje iskan niz.**\nOdgovorite z številko, ki je na seznamu pred ponudnikom, katerega ponudbo želite."+list)
         else:
             await ctx.send("**Iskani niz je preveč splošen, poskusite ponovno.**")
             print("[general] Search to broad for query", query+": "+current_time)
             return
 
         def check(m):
-            return 1 <= int(m.content) <= len(options) and ctx.channel.id == m.channel.id
+            return m.author.id == ctx.author.id and ctx.channel.id == m.channel.id and 1 <= int(m.content) <= len(options)
 
         msg = await client.wait_for('message', check=check, timeout=60)
         await ctx.send("**"+options[int("{.content}".format(msg))-1]+"**")
@@ -111,15 +109,14 @@ async def ponudba(ctx, *, query):
             list += ('{:<4}'.format(str(index+1))+"  "+option+"\n")
         list += "```"
         if len(list) <= 2000:
-            await ctx.send("**Več ponudnikov vsebuje iskan niz.**\nOdgovorite z številko, ki je na seznamu pred ponudnikom, katerega informacije želite.")
-            await ctx.send(list)
+            await ctx.send("**Več ponudnikov vsebuje iskan niz.**\nOdgovorite z številko, ki je na seznamu pred ponudnikom, katerega informacije želite."+list)
         else:
             await ctx.send("**Iskani niz je preveč splošen, poskusite ponovno.**")
             print("[general] Search to broad for query", query+": "+current_time)
             return
 
         def check(m):
-            return 1 <= int(m.content) <= len(options) and ctx.channel.id == m.channel.id
+            return m.author.id == ctx.author.id and ctx.channel.id == m.channel.id and 1 <= int(m.content) <= len(options)
 
         msg = await client.wait_for('message', check=check, timeout=60)
         await ctx.send("**"+options[int("{.content}".format(msg))-1]+"**\n"+get_info_message(providers[options[int("{.content}".format(msg))-1]]))
