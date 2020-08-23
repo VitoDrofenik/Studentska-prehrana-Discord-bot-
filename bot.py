@@ -6,8 +6,8 @@ from discord.ext import commands
 # here the prefix used to command the bot can be changed
 client = commands.Bot(command_prefix="!")
 
-# za lažji nadzor nad botom, ker ob zagonu potrebuje nekaj časa, da dobi ponudbo vseh ponudnikov
-# here for easier overview over the bot, as the initialization takes some time at the beginning
+# za lažji nadzor nad botom
+# here for easier overview over the bot
 @client.event
 async def on_ready():
     print("[general] Bot is ready")
