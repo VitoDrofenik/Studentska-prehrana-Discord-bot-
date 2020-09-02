@@ -6,6 +6,7 @@ from discord.ext import commands
 # tukaj se lahko spremeni predpona, za katero bot posluša
 # here the prefix used to command the bot can be changed
 client = commands.Bot(command_prefix="!")
+client.remove_command("help")
 
 # za lažji nadzor nad botom, ker ob zagonu potrebuje nekaj časa, da dobi ponudbo vseh ponudnikov
 # here for easier overview over the bot, as the initialization takes some time at the beginning
@@ -14,27 +15,30 @@ async def on_ready():
     await client.change_presence(status=discord.Status.online, activity=discord.Game("Povabi me: !povabi"))
     print("[general] Bot is ready")
 
+
 @client.command(name="pomoc")
 async def pomoc(ctx):
-    sporocilo="""
-    poleg ukaza pomoc, bot vsebuje tudi ukaze:
-    -hrana:
-        uporaba: `!hrana`
-        Izpiše ponudbo izbrane restavracije (to izbere uprabitelj bota).
-        Ta različica izpiše ponudbo restavracije `{}`
-    -ponudba:
-        uporaba: `!ponudba <iskalni_niz>`
-        Izpiše ponudbo iskane restavracije. Če je iskani niz v imenih večih restavracij, bot ponudi seznam za izbor.
-        Uporabnik izbira z odgovorom v obliki ustrezne številke.
-    -informacije:
-        uporaba: `!informacije <iskalni_niz>`
-        Izpiše informacije o iskani restavraiciji. Če je iskalni niz v imenih večij restavracij, bot ponudi seznam za izbor.
-        Uporabnik izbira z odgovorom v obliki ustrezne številke.
-    -povabi:
-        uporaba: `!povabi`
-        Izpiše povezavo za povabilo bota na svoj discord strežnik.
+    embed = discord.Embed(
+        title="Pomoč",
+        description="Neuraden bot za informacije o študentski prehrani."
+    )
+    ukazi = """
+    `!hrana` izpiše ponudbo izbrane restavracije. Ta bot ima izbrano restavracijo {}.
+    `!ponudba <iskalni_niz>` izpiše ponudbo iskane restavracije.
+    `!informacije <iskalni_niz>` izpiše informacije o iskani restavraciji.
+    `!povabi` izpiše povezavo za povabilo bota na drug discord strežnik.
     """.format(default_name)
-    await ctx.send(sporocilo)
+    embed.set_thumbnail(url=client.user.avatar_url)
+    embed.add_field(name="Ukazi", value=ukazi, inline=False)
+    embed.add_field(name="Dodaj bota na svoj strežnik", value="https://bit.ly/2XaFvFn\nBot je trenutno v {} strežnikih".format(len(client.guilds)), inline=False)
+    embed.add_field(name="Pomoč", value="Za več informacij o botu in izorni kodi dodaj CaptainYEET#9943")
+    await ctx.send(embed=embed)
+
+
+@client.command(name="help")
+async def help(ctx):
+    await pomoc(ctx)
+
 
 # ob prejetju ukaza hrana ("!hrana") izpiše vso ponudbo restavracije, ki je določena v programu
 # when command hrana ("!hrana") is called, entire menu of the chosen restaurant is sent
@@ -139,7 +143,7 @@ async def informacije(ctx, *, query):
 
 
 @client.command(name="povabi")
-async def pomoc(ctx):
+async def povabi(ctx):
     sporocilo = discord.Embed(
         title="Povabi me na svoj discord strežnik:",
         description="https://bit.ly/2XaFvFn",
