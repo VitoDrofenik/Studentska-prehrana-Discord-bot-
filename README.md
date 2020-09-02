@@ -8,7 +8,7 @@ Bota lahko povabite na svoj discord strežnik s klikom na [povezavo](https://bit
 Before usage, a new Discord application has to be created, as shown in the [instructions](http://discordpy.readthedocs.io/en/latest/discord.html), where the private key is aquired. The key is used when running the application for authentication. It has to be placed into a folder next to the bot file, or directly in the client.run command.
 
 ## Usage
-The bot has 4 commands:
+The bot has 5 commands:
 * !pomoc  
     usage: `!pomoc`  
     the bot sends the help message
@@ -21,3 +21,6 @@ The bot has 4 commands:
 * !informacije  
 	usage: `!informacije <query>`  
 	the bot sands informations about the restaurant that has the entered query in it's name. If there are more restaurants like that, bot sends a numbered list with all those restaurants and waits for the user to reply with a number that is in front of the restaurant he was looking for. If there are multiple restaurants with queryed text in their names, anwser has to be chosen from the list in one minute!
+* !povabi  
+    usage: `!povabi`  
+    the bot sends an invite link for itself to be added to other discord servers

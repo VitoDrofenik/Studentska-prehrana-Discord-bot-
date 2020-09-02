@@ -1,4 +1,5 @@
 ### DISCORD DEL
+import discord
 from datetime import datetime
 from discord.ext import commands
 
@@ -6,10 +7,11 @@ from discord.ext import commands
 # here the prefix used to command the bot can be changed
 client = commands.Bot(command_prefix="!")
 
-# za lažji nadzor nad botom
-# here for easier overview over the bot
+# za lažji nadzor nad botom, ker ob zagonu potrebuje nekaj časa, da dobi ponudbo vseh ponudnikov
+# here for easier overview over the bot, as the initialization takes some time at the beginning
 @client.event
 async def on_ready():
+    await client.change_presence(status=discord.Status.online, activity=discord.Game("Povabi me: !povabi"))
     print("[general] Bot is ready")
 
 @client.command(name="pomoc")
@@ -28,6 +30,9 @@ async def pomoc(ctx):
         uporaba: `!informacije <iskalni_niz>`
         Izpiše informacije o iskani restavraiciji. Če je iskalni niz v imenih večij restavracij, bot ponudi seznam za izbor.
         Uporabnik izbira z odgovorom v obliki ustrezne številke.
+    -povabi:
+        uporaba: `!povabi`
+        Izpiše povezavo za povabilo bota na svoj discord strežnik.
     """.format(default_name)
     await ctx.send(sporocilo)
 
@@ -125,6 +130,16 @@ async def ponudba(ctx, *, query):
     if not found:
         await ctx.send("**Med ponudniki ni zadetka, poskusite ponovno.**")
         print("[general] Provider", query, "not found: "+current_time)
+
+
+@client.command(name="povabi")
+async def pomoc(ctx):
+    sporocilo = discord.Embed(
+        title= "Povabi me na svoj discord strežnik:",
+        description= "https://bit.ly/2XaFvFn",
+        color= discord.Color.dark_blue()
+    )
+    await ctx.send(embed=sporocilo)
 
 
 ### WEB REQUESTS DEL
@@ -245,6 +260,6 @@ recent_providers = dict()
 menu_messages = dict()
 # branje ključa za bot iz zasebne datoteke, ker se takšne stvari ne objavljajo na internetu
 # reading the bot key from a private file because things like that shouldn't be posted on the internet
-dat = open("key.txt", "r")
+dat = open("test_key.txt", "r")
 key = dat.read().strip()
 client.run(key)
