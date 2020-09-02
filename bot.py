@@ -96,7 +96,7 @@ async def ponudba(ctx, *, query):
 # when command ("!informacije <query>") informations about the searched restaurant are sent, if query matches multiple providers,
 #   user chooses the one he is looking for
 @client.command(name="informacije")
-async def ponudba(ctx, *, query):
+async def informacije(ctx, *, query):
     now = datetime.now()
     current_time = now.strftime("%D %H:%M:%S")
     found = False
@@ -105,7 +105,10 @@ async def ponudba(ctx, *, query):
         if query.lower() in key.lower():
             options.append(key)
     if len(options) == 1:
-        await ctx.send("**"+options[0]+"**\n"+get_info_message(providers[options[0]]))
+        naziv = options[0]
+        info = get_info_message(providers[options[0]])
+        info.title = naziv
+        await ctx.send(embed=info)
         found = True
         print("[general] Request for", options[0], "informations complete: ", current_time)
     elif len(options) > 1:
@@ -124,7 +127,10 @@ async def ponudba(ctx, *, query):
             return m.author.id == ctx.author.id and ctx.channel.id == m.channel.id and 1 <= int(m.content) <= len(options)
 
         msg = await client.wait_for('message', check=check, timeout=60)
-        await ctx.send("**"+options[int("{.content}".format(msg))-1]+"**\n"+get_info_message(providers[options[int("{.content}".format(msg))-1]]))
+        naziv = options[int("{.content}".format(msg))-1]
+        info = get_info_message(providers[options[int("{.content}".format(msg))-1]])
+        info.title = naziv
+        await ctx.send(embed=info)
         found = True
         print("[general] Request for", options[int("{.content}".format(msg))-1], "informations: ", current_time)
     if not found:
@@ -135,9 +141,9 @@ async def ponudba(ctx, *, query):
 @client.command(name="povabi")
 async def pomoc(ctx):
     sporocilo = discord.Embed(
-        title= "Povabi me na svoj discord strežnik:",
-        description= "https://bit.ly/2XaFvFn",
-        color= discord.Color.dark_blue()
+        title="Povabi me na svoj discord strežnik:",
+        description="https://bit.ly/2XaFvFn",
+        color=discord.Color.dark_blue()
     )
     await ctx.send(embed=sporocilo)
 
@@ -228,12 +234,9 @@ def get_info_message(ID):
     telefonska = naslov.split("(")[1].replace(")", "")
     if len(telefonska) == 0:
         telefonska = "Ponudnik nima vpisane telefonske številke"
-    info_message = "Naslov: "
-    info_message += naslov.split("(")[0] + "\nTelefonska številka: " + telefonska
     doplacilo = str(informacije.find(class_="color-light-grey")).replace('<span class="color-light-grey">', "").replace("</span>", "")
     if len(doplacilo) == 0:
         doplacilo = "Ponudnik nima vpisanega zneska doplačila"
-    info_message += "\nDoplačilo: " + doplacilo
     casi = str(soup.find_all(class_="col-md-12 text-bold"))
     med_tednom = casi.split("<br/>")[1].strip()
     sobota = casi.split("Sobota :")[1].strip()
@@ -242,8 +245,13 @@ def get_info_message(ID):
     else:
         sobota = casi.split("<br/>")[4].strip()
     nedelja = casi.split("Nedelja / Prazniki :")[1].replace("</div>]", "").replace("<br/> ", "").strip()
-    info_message += "\nOdpiralni časi:\n\tMed tednom: "+med_tednom+"\n\tSobota: "+sobota+"\n\tNedelja in prazniki: "+nedelja
-    return info_message
+    odpiralni_casi = "\tMed tednom: "+med_tednom+"\n\tSobota: "+sobota+"\n\tNedelja in prazniki: "+nedelja
+    embed = discord.Embed()
+    embed.add_field(name="Naslov", value=naslov.split("(")[0], inline=False)
+    embed.add_field(name="Telefonska številka", value=telefonska, inline=False)
+    embed.add_field(name="Doplačilo", value=doplacilo, inline=False)
+    embed.add_field(name="Odpiralni časi", value=odpiralni_casi, inline=False)
+    return embed
 
 
 # ERROR HANDLING
@@ -260,6 +268,6 @@ recent_providers = dict()
 menu_messages = dict()
 # branje ključa za bot iz zasebne datoteke, ker se takšne stvari ne objavljajo na internetu
 # reading the bot key from a private file because things like that shouldn't be posted on the internet
-dat = open("test_key.txt", "r")
+dat = open("key.txt", "r")
 key = dat.read().strip()
 client.run(key)
