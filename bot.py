@@ -260,6 +260,8 @@ def get_info_message(ID):
     sobota = casi.split("Sobota :")[1].strip()
     if sobota.startswith("Zaprto"):
         sobota = "Zaprto"
+    elif sobota.startswith("<br/>"):
+        sobota = sobota.split("<br/>")[1].strip()
     else:
         sobota = casi.split("<br/>")[4].strip()
     nedelja = casi.split("Nedelja / Prazniki :")[1].replace("</div>]", "").replace("<br/> ", "").strip()
