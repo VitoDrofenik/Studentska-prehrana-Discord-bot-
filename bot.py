@@ -6,21 +6,24 @@ from discord.ext import commands
 # tukaj se lahko spremeni predpona, za katero bot posluša
 # here the prefix used to command the bot can be changed
 client = commands.Bot(command_prefix="!")
-client.remove_command("help")
 
-# za lažji nadzor nad botom, ker ob zagonu potrebuje nekaj časa, da dobi ponudbo vseh ponudnikov
-# here for easier overview over the bot, as the initialization takes some time at the beginning
+
 @client.event
 async def on_ready():
     await client.change_presence(status=discord.Status.online, activity=discord.Game("Povabi me: !povabi"))
+    # za lažji nadzor nad botom, ker ob zagonu potrebuje nekaj časa, da dobi ponudbo vseh ponudnikov
+    # here for easier overview over the bot, as the initialization takes some time at the beginning
     print("[general] Bot is ready")
 
 
+# pošlje embed z informacijami o botu ter ukazi, za katere posluša
+# sends an embed with informations about the bot and its commands
 @client.command(name="pomoc")
 async def pomoc(ctx):
     embed = discord.Embed(
         title="Pomoč",
-        description="Neuraden bot za informacije o študentski prehrani."
+        description="Neuraden bot za informacije o študentski prehrani.",
+        color=discord.Color.from_rgb(70, 193, 238)
     )
     ukazi = """
     `!hrana` izpiše ponudbo izbrane restavracije. Ta bot ima izbrano restavracijo {}.
@@ -31,10 +34,12 @@ async def pomoc(ctx):
     embed.set_thumbnail(url=client.user.avatar_url)
     embed.add_field(name="Ukazi", value=ukazi, inline=False)
     embed.add_field(name="Dodaj bota na svoj strežnik", value="https://bit.ly/2XaFvFn\nBot je trenutno v {} strežnikih".format(len(client.guilds)), inline=False)
-    embed.add_field(name="Pomoč", value="Za več informacij o botu in izorni kodi dodaj CaptainYEET#9943")
+    embed.add_field(name="Pomoč", value="Za več informacij o botu in izvorni kodi dodaj CaptainYEET#9943")
     await ctx.send(embed=embed)
 
-
+# odstranjevanje privzetega ukaza za pomoč in preusmeritev na zgornji ukaz
+# deletion of the default help command and rerouting !help to the version above
+client.remove_command("help")
 @client.command(name="help")
 async def help(ctx):
     await pomoc(ctx)
@@ -51,6 +56,7 @@ async def hrana(ctx):
     # izpis v konzolo za boljši nadzor
     # output to the console for better control
     print("[general] Request for "+restaurant+" menu complete: ", current_time)
+
 
 # ob prejetju ukaza ponudba ("!ponudba <poizvedba>") izpiše ponudbo iskane restavracije, če se s poivedbo ujema
 #   več ponudnikov, uporabnik izbere iskanega
@@ -142,12 +148,14 @@ async def informacije(ctx, *, query):
         print("[general] Provider", query, "not found: "+current_time)
 
 
+# pošlje embed s skrajšanjio povezavo za povabilo bota na drug discord strežnik
+# sends an embed with a shortened invite link for the bot
 @client.command(name="povabi")
 async def povabi(ctx):
     sporocilo = discord.Embed(
         title="Povabi me na svoj discord strežnik:",
         description="https://bit.ly/2XaFvFn",
-        color=discord.Color.dark_blue()
+        color=discord.Color.from_rgb(70, 193, 238)
     )
     await ctx.send(embed=sporocilo)
 
@@ -172,6 +180,7 @@ default_name = restaurant
 
 
 # DOBIVANJE IMENIKA PONUDNIKOV
+# retrieval of a list of providers
 def get_providers():
     url = "https://www.studentska-prehrana.si/sl/restaurant"
     page = requests.get(url, headers=headers)
@@ -187,6 +196,7 @@ def get_providers():
 
 
 # DOBIVANJE JEDI
+# retrieval of specified provider's menu
 def get_menu_message(ID):
     now = datetime.now()
     current_time = now.strftime("%D %H:%M:%S")
@@ -203,11 +213,15 @@ def get_menu_message(ID):
     return menu_messages[ID]
 
 
+# shranjevanje ponudbe in časa pridobitve ponudbe
+# storing the menu and the time of retrieval
 def store_menu_message(ID, now):
     menu_messages[ID] = scrape_menu(ID)
     recent_providers[ID] = now
 
 
+# "praskanje" ponudbe iz ustrezne spletne strani
+# scraping the menu from the correct web page
 def scrape_menu(ID):
     url = "https://www.studentska-prehrana.si/restaurant/Details/" + str(ID)
     page = requests.get(url, headers=headers)
@@ -250,7 +264,9 @@ def get_info_message(ID):
         sobota = casi.split("<br/>")[4].strip()
     nedelja = casi.split("Nedelja / Prazniki :")[1].replace("</div>]", "").replace("<br/> ", "").strip()
     odpiralni_casi = "\tMed tednom: "+med_tednom+"\n\tSobota: "+sobota+"\n\tNedelja in prazniki: "+nedelja
-    embed = discord.Embed()
+    embed = discord.Embed(
+        color=discord.Color.from_rgb(70, 193, 238)
+    )
     embed.add_field(name="Naslov", value=naslov.split("(")[0], inline=False)
     embed.add_field(name="Telefonska številka", value=telefonska, inline=False)
     embed.add_field(name="Doplačilo", value=doplacilo, inline=False)
