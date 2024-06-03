@@ -219,7 +219,7 @@ def get_info_message(ID):
         sobota = sobota.split("<br/>")[1].strip()
     else:
         sobota = casi.split("<br/>")[4].strip()
-    nedelja = casi.split("Nedelja / Prazniki :")[1].replace("</div>]", "").replace("<br/> ", "").strip()
+    nedelja = casi.split("Nedelja :")[1].replace("</div>]", "").replace("<br/> ", "").strip()
     odpiralni_casi = "\tMed tednom: "+med_tednom+"\n\tSobota: "+sobota+"\n\tNedelja in prazniki: "+nedelja
     embed = discord.Embed(
         color=discord.Color.from_rgb(70, 193, 238)
